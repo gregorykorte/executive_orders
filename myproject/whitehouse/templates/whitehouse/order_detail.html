@@ -1,0 +1,16 @@
+{% block content %}
+    <h2>THE EXECUTIVE ORDER PROJECT</h2>
+	<h2>{{object.title}}</h2>
+	<p><a href="{{order.order_type}}/">{{object.order_type}}</a> {{eo_proc_no}}signed by <a href="{{order.president.potus_slug}}/">President {{object.president}}</a> at {{object.signed_location}} on {{object.sign_date}}</br>
+	<p>Description: {{object.abstract}}</p>
+	<p>Published in the <a href="{{object.fr_url}}">Federal Register</a> on {{object.fr_date}}.</p>
+	<p><a href="{{object.wh_url}}">The White House</a>
+	<p><a href="{{object.ucsb_url}}">The American Presidency Project</a>
+	<p><a href="{{object.bud_impact_url}}">OMB budgetary impact statement</a>
+	<p>What President {{object.president}} said about it: {{object.presidential_statement}}</p>
+	<p>Related stories:</p>
+	{% for story in order.related_story.all %}
+		<p><a href="{{story.story_url}}">{{story.story_title}}</p> {% if not forloop.last %}, {% endif %}</a><br/>
+	{% endfor %}
+By <a href="http://usatoday.com/gregorykorte">Gregory Korte</a>, USA TODAY
+{% endblock %}
