@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.template.defaultfilters import slugify
 from django.urls import reverse, reverse_lazy
 from django.db import models
+from django.contrib import admin
 
 class President (models.Model):
     potus_id = models.IntegerField('potus', primary_key=True) # i.e., Trump = 45
@@ -31,6 +32,7 @@ class Agencies (models.Model):
     class Meta:
         verbose_name = "agency"
         verbose_name_plural = "agencies"
+        ordering = ['agency_long']
 
     def __unicode__(self):
         return self.agency_long
@@ -44,15 +46,26 @@ class OrderType (models.Model):
         return self.long_type
 
 class Stories(models.Model):
+    presto_id = models.IntegerField('Presto', null=True, blank = True, unique = True)
     story_title = models.CharField(max_length=100)
     story_url = models.URLField()
+    story_date = models.DateField()   
 
     class Meta:
         verbose_name = "story"
         verbose_name_plural = "stories"
+        ordering = ['-story_date']
 
     def __unicode__(self):
         return self.story_title
+
+    def date_save(self, *args, **kwargs): #fetches date string from URL and converts to formatted date on save 
+        self.story_date = datetime.datetime.strptime(re.search('(?<!\d)\d{4,4}(?!\d).{6}', story_url).group(0), "%Y/%m/%d").strftime("%d-%m-%Y")
+        super(Stories,self).save(*args, **kwargs)
+
+    def presto_save(self, *args, **kwargs): #fetches Presto ID and automatically saves. 
+        self.presto_id = re.search('(\d*)\/$', story_url).group(1)
+        super(Stories,self).save(*args, **kwargs)
     
 class Order (models.Model):
 
@@ -94,21 +107,43 @@ class Order (models.Model):
     subj_to_appropriations = models.NullBooleanField()
     judicial_review = models.NullBooleanField()
 
-    related_story = models.ManyToManyField(Stories, blank = True)
+    related_story = models.ManyToManyField(Stories)
+
+    # new_related_story = models.ForeignKey(RelatedStories, blank=True, null = True)
 
     order_slug = models.SlugField(max_length=256, default='')
 
-    def save(self, *args, **kwargs):
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs): #converts order title into a slugified url-ready string
         self.order_slug = slugify(self.title)
         super(Order,self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.title
 
-class Meta:
-    ordering = ["-sign_date"]
+    class Meta:
+        ordering = ["-sign_date"]
 
-'''
+class Deadline(models.Model):
+
+    deadline_order = models.ForeignKey(Order)
+    followup_item = models.TextField(blank=True, null=True)
+    deadline_days = models.DurationField(blank=True, null=True)
+    deadline_date = models.DateField(blank=True, null=True)
+    
+class StoriesAdmin(admin.ModelAdmin):
+    readonly_fields = ('presto_id', 'story_date')
+
+
+class DeadlineInline(admin.TabularInline):
+    model = Deadline
+
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [
+        DeadlineInline,
+    ]
+
     def get_absolute_url(self):
         kwargs = {
               #'potus_slug': President.potus_slug,
@@ -132,4 +167,7 @@ class Meta:
 #    (DISPOSITION_REVOKES, 'Revokes'),
 #    (DISPOSITION_AMENDS, 'Amends'),
 #)
+
+'''
+
 
