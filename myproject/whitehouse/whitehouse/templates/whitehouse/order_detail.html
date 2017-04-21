@@ -1,0 +1,46 @@
+{% block content %}
+    <h2>THE EXECUTIVE ORDER PROJECT</h2>
+	<h2>{{object.title}}</h2>
+	<p><a href="type/{{object.order_type.short_type}}/">{{object.order_type}}</a> {{eo_proc_no}}signed by <a href="potus/{{object.president.potus_slug}}/">President {{object.president}}</a> at {{object.signed_location}} on {{object.sign_date}}.</br>
+	<p>Description: {{object.abstract}}</p>
+	
+{% if object.fr_date is null %}
+	<p>Not yet available in the Federal Register.</p>
+{% else %}
+	<p>Published in the <a href="{{object.fr_url}}">Federal Register</a> on {{object.fr_date}}.</p>
+{% endif %}
+
+	<p>Also available at <a href="{{object.wh_url}}">The White House</a> and <a href="{{object.ucsb_url}}">The American Presidency Project</a>.</p>
+
+This order is about {{object.order_words}} long.	
+
+
+	
+<p>Order text:</p>
+
+{{object.order_text |safe }}
+	
+{% if object.bud_impact_url == None %}
+	<p>This order has a <a href="{{object.bud_impact_url}}">OMB budgetary impact statement</a> from the Office of Management and Budget. 
+	(<a href="http://www.usatoday.com/story/news/politics/2015/03/21/cost-of-obama-executive-orders/25024489/">Explanation.</a>)</p>
+{% endif %}
+
+	<p>Departments and agencies affected:</p>
+	{% for agency in agencies.related_story.all %}
+	<p>{{agencies.agency_long}}</a></p>
+	{% empty %}
+    None identified.		
+	{% endfor %}
+
+	<p>What President {{object.president}} said about it: {{object.presidential_statement}}</p>
+	<p>Related stories:</p>
+	{% for related_story in stories.related_story.all %}
+		<p><a href="{{stories.story_url}}">{{stories.story_title}}</a></p>
+	{% empty %}
+    No related stories.		
+	{% endfor %}
+	
+
+	<p><i>This page was last updated {{object.last_updated}}</i></p> 
+By <a href="http://usatoday.com/gregorykorte">Gregory Korte</a>, USA TODAY
+{% endblock %}

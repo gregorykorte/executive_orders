@@ -1,0 +1,13 @@
+{% block content %}
+    <h2>THE EXECUTIVE ORDER PROJECT</h2>
+    <p>President {{order.president}} has signed {{order__count}} actions, including {{ 'order__count'}} proclamations, {{ 'order__count' }} executive orders, {{ 'order__count'}} presidential memoranda and {{ 'order__count' }} national secutity presidential memoranda.
+	<ul>
+        {% for order in order_list %}
+            <a href="{{order.pk}}/">{{order.title}}</a><br/>
+			<a href="type/{{order.order_type.short_type}}/">{{order.order_type}}</a> 
+			by <a href="potus/{{order.president.potus_slug}}/">President {{order.president}}</a> 
+			on {{order.sign_date}}<br/><br/>
+        {% endfor %}
+    </ul>
+By <a href="http://usatoday.com/gregorykorte">Gregory Korte</a>, USA TODAY
+{% endblock %}
